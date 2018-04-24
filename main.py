@@ -45,6 +45,7 @@ for tag in tags.split('\n'):
                 continue
 
 
+# Sort commits by date - oldest first
 commits.sort(key=lambda x: x.date)
 
 print "Plotting %d commits and %d branches" % (len(commits), len(branches))
@@ -61,10 +62,10 @@ for b in branches:
 
 fn = tempfile.mktemp()
 with open(fn, 'w') as fp:
-    fp.write('<!DOCTYPE html>')
-    fp.write('<html><body>')
+    fp.write('<!DOCTYPE html>\n')
+    fp.write('<html><body>\n')
 
-    fp.write('<svg height="%d" width="%d">' % (400 + len(branches) * 50, 400 + (len(commits) * 10)))
+    fp.write('<svg height="%d" width="%d">\n' % (400 + len(branches) * 50, 400 + (len(commits) * 10)))
 
     for c in commits:
         fp.write(c.point())
@@ -72,7 +73,7 @@ with open(fn, 'w') as fp:
     for b in branch_lines:
         fp.write(b.line())
 
-    fp.write('</svg></body></html>')
+    fp.write('</svg>\n</body>\n</html>')
 
 print "Wrote output to %s opening in browser" % (fn)
 subprocess.check_output(['x-www-browser', fn])
