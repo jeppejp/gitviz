@@ -1,3 +1,6 @@
+import subprocess
+import re
+
 branch_heights = {}
 BRANCH_DIST = 30
 max_height = 20
@@ -78,3 +81,15 @@ def get_branch_height(commit, name=None):
     max_height += BRANCH_DIST
     branch_heights[commit.branches[0]] = max_height
     return max_height
+
+
+def get_all_branches():
+    branches = []
+    branch_output = subprocess.check_output(['git', 'branch', '-a'])
+    pat = re.compile('(remotes/origin/.*)')
+    for line in branch_output.split('\n'):
+        m = pat.search(line)
+        if m:
+            if 'HEAD' not in m.group(1):
+                branches.append(m.group(1))
+    return branches

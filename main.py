@@ -3,19 +3,29 @@ import subprocess
 import re
 import tempfile
 from Helpers import *
+import argparse
+import sys
 
+
+parser = argparse.ArgumentParser(description='GitViz')
+parser.add_argument('-o', '--output', action='store',
+                    help='Specify the output file. Creates random tmp file per default')
+parser.add_argument('-f', '--fetch', action='store_true',
+                    help='Run \'git fetch --all\' before starting')
+parser.add_argument('-b', '--browser', action='store_true',
+                    help='Open the output using x-www-browser')
+
+args = parser.parse_args(sys.argv[1:])
+
+
+# Run git fetch --all if specified. Required to get all info from all branches
+if args.fetch:
+    subprocess.check_output(['git', 'fetch', '--all'])
 
 branch_lines = []
 commits = []
-branches = []
+branches = get_all_branches()
 
-branch_output = subprocess.check_output(['git', 'branch', '-a'])
-pat = re.compile('(remotes/origin/.*)')
-for line in branch_output.split('\n'):
-    m = pat.search(line)
-    if m:
-        if 'HEAD' not in m.group(1):
-            branches.append(m.group(1))
 
 # try to sort the branches
 for kw in ['master', 'release-', 'develop']:
@@ -48,7 +58,6 @@ for tag in tags.split('\n'):
 # Sort commits by date - oldest first
 commits.sort(key=lambda x: x.date)
 
-print "Plotting %d commits and %d branches" % (len(commits), len(branches))
 
 i = 5
 for c in commits:
@@ -60,7 +69,11 @@ for c in commits:
 for b in branches:
     branch_lines.append(BranchLine(b, commits))
 
-fn = tempfile.mktemp()
+if args.output:
+    fn = args.output
+else:
+    fn = tempfile.mktemp() + '.html'
+
 with open(fn, 'w') as fp:
     fp.write('<!DOCTYPE html>\n')
     fp.write('<html><body>\n')
@@ -75,5 +88,8 @@ with open(fn, 'w') as fp:
 
     fp.write('</svg>\n</body>\n</html>')
 
-print "Wrote output to %s opening in browser" % (fn)
-# subprocess.check_output(['x-www-browser', fn])
+if not args.output:
+    # If output not specified print the name of the tempfile generated
+    print "Output generated in %s" % (fn)
+if args.browser:
+    subprocess.check_output(['x-www-browser', fn])
