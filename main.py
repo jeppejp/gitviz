@@ -76,4 +76,4 @@ with open(fn, 'w') as fp:
     fp.write('</svg>\n</body>\n</html>')
 
 print "Wrote output to %s opening in browser" % (fn)
-subprocess.check_output(['x-www-browser', fn])
+# subprocess.check_output(['x-www-browser', fn])
